@@ -12,7 +12,7 @@ runs:
         python-version: ${{ env.PY_VERSION }}
 
     - name: 🦾 Install dependencies
-      run: uv run poe sync
+      run: uv sync --locked --all-extras --dev
       shell: bash
 
     - name: 💅 🧪 Validate!
