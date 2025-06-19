@@ -1,0 +1,83 @@
+[project]
+name = "python-template"
+version = "0.0.1"
+description = "My python projects template. Trying to keep it lean."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [ { name = "Franco Bocci", email = "francogbocci@gmail.com" } ]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python_template"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "poethepoet>=0.35.0",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.9.5",
+]
+
+[tool.pytest.ini_options]
+addopts = """\
+    --cov python_template \
+    --cov-report term-missing \
+    --no-cov-on-fail
+"""
+
+[tool.coverage.report]
+exclude_lines = [
+    # Don't complain about lines explicitly marked as uncoverable
+    "pragma: no cover",
+    # Don't complain about type checking code
+    "if TYPE_CHECKING:",
+    # Don't complain about not-implemented parts of code
+    "raise NotImplementedError",
+    # Don't complain about abstract methods, they aren't run
+    '@(abc\.)?abstractmethod',
+]
+# least covered on top, most covered on bottom
+# default is "name", and to reverse the order use "-cover"
+skip_covered = "true"
+sort = "cover"
+
+[tool.ruff]
+target-version = "py313"
+output-format = "full"
+line-length = 88
+fix = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN",      # Type hints related, let mypy handle these.
+    "COM812",   # "Trailing comma missing". If black is happy, we are happy.
+    "D",        # Docstrings related, way too strict to our taste
+    "ISC001",   # Implicit string concatenation
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "ARG",      # "Unused function argument". Fixtures are often unused.
+    "S101",     # "Use of `assert` detected"
+    "S106",     # "Possible hardcoded password"
+    "PT004",    # Does not return anything, add leading underscore
+    "PLR2004",  # Magic value used in comparison
+]
+
+[tool.mypy]
+strict = true
+namespace_packages = true
+explicit_package_bases = true
+plugins = []
+ignore_missing_imports = true
+
+[tool.poe]
+include = "scripts/app.toml"

@@ -1,0 +1,35 @@
+[tool.poe.tasks.sync]
+help = "Sync dependencies."
+cmd = "uv sync --all-extras"
+
+[tool.poe.tasks.install-hooks]
+help = "Install pre commit hooks."
+cmd = "uv run pre-commit install"
+
+[tool.poe.tasks.format]
+help = "Format code."
+cmd = "uv run ruff format ${POE_ROOT}"
+
+[tool.poe.tasks.lint]
+help = "Lint code."
+cmd = "uv run ruff check --fix ${POE_ROOT}"
+
+[tool.poe.tasks.check]
+help = "Run type checker."
+cmd = "uv run mypy ${POE_ROOT}"
+
+[tool.poe.tasks.test]
+help = "Run tests."
+cmd = "uv run pytest ${POE_ROOT}"
+
+[tool.poe.tasks.flc]
+help = "`flc`: Format, lint, and check."
+sequence = [ "format", "lint", "check" ]
+
+[tool.poe.tasks.flct]
+help = "`flct`: Format, lint, check, and test."
+sequence = [ "format", "lint", "check", "test" ]
+
+[tool.poe.tasks.dockerize]
+help = "Build docker image."
+cmd = "docker build -t python-template ."
