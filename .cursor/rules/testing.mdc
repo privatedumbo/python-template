@@ -1,0 +1,74 @@
+---
+description: Testing standards and best practices using pytest
+globs: ["tests/**/*.py", "**/test_*.py"]
+alwaysApply: false
+---
+
+# Testing Guidelines
+
+## Test Framework
+- Use `pytest` as the testing framework (not `unittest`)
+- Run tests with: `uv run poe test`
+- Tests are located in the `tests/` directory
+
+## Test Structure
+
+### Fixtures
+- **Use fixtures when possible** for test setup and teardown
+- Prefer fixtures over setup/teardown methods
+- Use fixture scopes appropriately (`function`, `class`, `module`, `session`)
+- Name fixtures descriptively based on what they provide
+- **Use `conftest.py` for shared fixtures**:
+  - Place global fixtures in `tests/conftest.py` for all tests
+  - Use nested `conftest.py` files in subdirectories for package-specific fixtures
+  - Fixtures in `conftest.py` are automatically discovered by pytest
+
+### Test Organization
+- One test file per module: `test_<module_name>.py`
+- **Avoid large test files with independent content**
+  - When testing different things, create separate files unless there's a reason to keep them together
+  - Split tests by functionality, feature, or component
+  - Keep test files focused and manageable in size
+- Group related tests in classes when it improves organization
+- Use descriptive test names that explain what is being tested
+- Follow the Arrange-Act-Assert (AAA) pattern
+
+### Test Best Practices
+- Keep tests focused and test one thing at a time
+- Use parametrize for testing multiple scenarios
+- Mock external dependencies and I/O operations
+- Ensure tests are independent and can run in any order
+- Write tests that are fast and deterministic
+
+## Example Patterns
+
+```python
+import pytest
+
+
+@pytest.fixture
+def sample_config():
+    """Fixture providing test configuration."""
+    return {"key": "value"}
+
+
+def test_feature_with_fixture(sample_config):
+    """Test using a fixture."""
+    assert sample_config["key"] == "value"
+
+
+@pytest.mark.parametrize("input,expected", [
+    (1, 2),
+    (2, 4),
+    (3, 6),
+])
+def test_parametrized(input, expected):
+    """Test multiple scenarios with parametrize."""
+    assert input * 2 == expected
+```
+
+## Coverage
+- Code coverage is enabled by default
+- Aim for meaningful coverage, not just high percentages
+- Focus on testing critical paths and edge cases
+- Coverage reports show missing lines to guide test writing

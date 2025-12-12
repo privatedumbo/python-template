@@ -1,0 +1,54 @@
+---
+description: Python 3.12+ best practices and modern syntax guidelines
+alwaysApply: true
+---
+
+# Python Version
+- Target Python >= 3.12
+- Use only features and syntax compatible with Python 3.12+
+- Leverage modern Python 3.12+ features when appropriate
+
+# Python 3.12+ Best Practices
+
+## Type Hints
+- Use modern type hint syntax with PEP 604 union types: `str | None` instead of `Optional[str]`
+- Use `list[str]` instead of `List[str]`, `dict[str, int]` instead of `Dict[str, int]`
+- Use PEP 695 generic type syntax where applicable: `type MyType[T] = list[T]`
+- Always include type hints for function parameters and return types
+- Use `from typing import` only when necessary (Protocol, TypeAlias, etc.)
+
+## Modern Syntax Features
+- Use structural pattern matching (`match`/`case`) for complex conditionals when appropriate
+- Use the walrus operator (`:=`) to reduce redundancy when it improves readability
+- Use f-strings for all string formatting
+- Use pathlib.Path for file system operations instead of os.path
+
+## Code Style
+- Follow PEP 8 guidelines
+- Maximum line length: 88 characters (Black/Ruff default)
+- Use trailing commas in multi-line collections
+- Prefer explicit over implicit
+
+## Error Handling
+- Use exception groups (PEP 654) when handling multiple exceptions: `except* ExceptionType`
+- Include specific exception types rather than bare `except:`
+- Use contextlib.suppress() for intentionally ignored exceptions
+
+## Async/Await
+- Use `async`/`await` syntax for asynchronous operations
+- Use `asyncio.TaskGroup` for managing concurrent tasks (PEP 678)
+
+## Functions and Classes
+- Use `@staticmethod` and `@classmethod` appropriately
+- Prefer dataclasses or Pydantic models for data structures
+- Use `__slots__` in classes when memory optimization is beneficial
+
+## Imports
+- Group imports: standard library, third-party, local
+- Use absolute imports
+- Avoid wildcard imports (`from module import *`)
+
+## Documentation
+- Use docstrings for all public modules, functions, classes, and methods
+- Follow Google or NumPy docstring format
+- Keep docstrings concise but informative

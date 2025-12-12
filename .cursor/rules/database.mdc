@@ -1,0 +1,31 @@
+---
+description: Database interaction patterns and best practices
+alwaysApply: false
+---
+
+# Database Guidelines
+
+## ORM Usage
+- **Prefer ORMs** (like SQLAlchemy) for database interactions
+- Use raw SQL only when:
+  - ORM patterns become too complex or unreadable
+  - Performance-critical operations require optimization
+  - Specific database features aren't supported by the ORM
+
+## Benefits of ORMs
+- Type safety and IDE support
+- Protection against SQL injection
+- Easier migrations and schema management
+- Consistent patterns across the codebase
+
+## When Raw SQL is Acceptable
+- Complex aggregations or analytical queries
+- Bulk operations where ORM overhead is significant
+- Database-specific features (e.g., PostgreSQL JSON operators)
+- Performance-critical paths after profiling shows ORM bottleneck
+
+## Best Practices
+- Always use parameterized queries (never string interpolation for values)
+- Keep database logic in repository/adapter layers
+- Use transactions appropriately for data consistency
+- Document any raw SQL with comments explaining the choice
