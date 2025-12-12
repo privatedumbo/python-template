@@ -20,8 +20,9 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 ### Infrastructure (Optional)
 
 - 🛫 **Pre-commit hooks** - Automated code quality checks
-- 🐳 **Docker** - Multi-stage builds with distroless images
+- 🐳 **Docker** - Multi-stage builds optimized for Python/UV
 - 🔄 **GitHub Actions** - CI/CD pipeline
+- 🤖 **Cursor AI rules** - Best practices for AI-assisted development
 
 ---
 
@@ -29,7 +30,7 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.11+
 - [Copier](https://copier.readthedocs.io/) (`pipx install copier` or `uv tool install copier`)
 
 ### Generate a New Project
@@ -48,8 +49,7 @@ Copier will ask you a series of questions to customize your project:
 
 | Question | Description | Default |
 |----------|-------------|---------|
-| `project_name` | Human-readable project name | - |
-| `project_slug` | Python package name (lowercase, underscores) | Derived from project_name |
+| `project_slug` | Project/package name (lowercase, underscores) | - |
 | `description` | Short project description | "A Python project" |
 | `author_name` | Author's full name | - |
 | `author_email` | Author's email | - |
@@ -58,34 +58,46 @@ Copier will ask you a series of questions to customize your project:
 | `license` | Project license | MIT |
 | `include_docker` | Include Docker support | Yes |
 | `include_github_actions` | Include GitHub Actions CI/CD | Yes |
+| `include_cursor_rules` | Include Cursor AI rules | No |
 
 ### Example
 
 ```bash
 $ copier copy gh:privatedumbo/python-template my-project
 
-🎤 What is your project name?
-   My Awesome Project
-🎤 Python package name (lowercase, underscores)
+🐍 Python Project Generator
+═══════════════════════════════════════════════════════
+
+This template creates a modern Python project with:
+• UV for fast dependency management
+• Ruff for linting and formatting
+• Mypy for type checking
+• Pytest for testing
+• Pre-commit hooks
+
+Let's configure your new project!
+
+🎤 Project name (lowercase, underscores allowed).
    my_awesome_project
-🎤 Short description of your project
+🎤 A short description of your project (one line).
    A truly awesome Python project
-🎤 Author's full name
+🎤 Your full name.
    John Doe
-🎤 Author's email address
+🎤 Your email address.
    john@example.com
-🎤 GitHub username or organization
+🎤 GitHub username or organization name.
    johndoe
-🎤 Minimum Python version
-   3.12
-🎤 Project license
-   MIT
+🎤 Minimum Python version for your project.
+   3.12 (stable, recommended)
+🎤 Open source license for your project.
+   MIT (permissive, simple)
 🎤 Include Docker support?
    Yes
 🎤 Include GitHub Actions CI/CD?
    Yes
+🎤 Include Cursor AI rules?
+   No
 
-    create  .
     create  .copier-answers.yml
     create  .gitignore
     create  .pre-commit-config.yaml
@@ -99,7 +111,8 @@ $ copier copy gh:privatedumbo/python-template my-project
     create  scripts/app.toml
     create  tests/__init__.py
     create  tests/test_core.py
-    ...
+    create  .github/workflows/ci.yaml
+    create  .github/actions/validation/action.yaml
 ```
 
 ---
@@ -167,6 +180,7 @@ python-template/
 │   ├── scripts/
 │   │   └── app.toml.jinja
 │   ├── .github/             # GitHub Actions (conditional)
+│   ├── .cursor/rules/       # Cursor AI rules (conditional)
 │   ├── pyproject.toml.jinja
 │   ├── README.md.jinja
 │   ├── Dockerfile.jinja     # Docker support (conditional)
