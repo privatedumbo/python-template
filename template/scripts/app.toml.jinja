@@ -29,7 +29,8 @@ sequence = [ "format", "lint", "check" ]
 [tool.poe.tasks.flct]
 help = "`flct`: Format, lint, check, and test."
 sequence = [ "format", "lint", "check", "test" ]
-
-[tool.poe.tasks.generate]
-help = "Generate a project from the template (for manual testing)."
-cmd = "copier copy . /tmp/test-project --defaults --force"
+{% if include_docker %}
+[tool.poe.tasks.dockerize]
+help = "Build docker image."
+cmd = "docker build -t {{ project_slug }} ."
+{% endif %}

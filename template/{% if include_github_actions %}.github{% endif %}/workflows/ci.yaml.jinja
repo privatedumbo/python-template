@@ -1,0 +1,25 @@
+name: CI checks
+
+on:
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  format-lint-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["{{ python_version }}"]
+
+    steps:
+      - name: 🛎️ Checkout
+        uses: actions/checkout@v4
+
+      - name: ✅ validate code
+        env:
+          PY_VERSION: {% raw %}${{ matrix.python-version }}{% endraw %}
+
+        uses: ./.github/actions/validation

@@ -1,0 +1,141 @@
+# Copier template configuration
+# See https://copier.readthedocs.io/en/stable/configuring/
+
+_min_copier_version: "9.0.0"
+_subdirectory: template
+_answers_file: .copier-answers.yml
+
+_message_before_copy: |
+
+  🐍 Python Project Generator
+  ═══════════════════════════════════════════════════════
+
+  This template creates a modern Python project with:
+  • UV for fast dependency management
+  • Ruff for linting and formatting
+  • Mypy for type checking
+  • Pytest for testing
+  • Pre-commit hooks
+
+  Let's configure your new project!
+
+# ─────────────────────────────────────────────────────────
+# Project Information
+# ─────────────────────────────────────────────────────────
+
+project_slug:
+  type: str
+  help: |
+    Project name (lowercase, underscores allowed).
+    This will be used as the package name and directory name.
+    Examples: my_project, data_pipeline, api_client
+  placeholder: "my_awesome_project"
+  validator: >-
+    {% if not project_slug %}
+    Project name is required
+    {% elif not project_slug | regex_search('^[a-z][a-z0-9_]*$') %}
+    Must start with a letter and contain only lowercase letters, numbers, and underscores
+    {% endif %}
+
+description:
+  type: str
+  help: |
+    A short description of your project (one line).
+    This appears in pyproject.toml and the README header.
+  default: "A Python project"
+  placeholder: "A blazingly fast data processing library"
+
+# ─────────────────────────────────────────────────────────
+# Author Information
+# ─────────────────────────────────────────────────────────
+
+author_name:
+  type: str
+  help: |
+    Your full name.
+    Used in pyproject.toml authors and LICENSE file.
+  placeholder: "Jane Doe"
+  validator: "{% if not author_name %}Author name is required{% endif %}"
+
+author_email:
+  type: str
+  help: |
+    Your email address.
+    Used in pyproject.toml authors field.
+  placeholder: "jane@example.com"
+  validator: >-
+    {% if not author_email %}
+    Email is required
+    {% elif not author_email | regex_search('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$') %}
+    Please enter a valid email address
+    {% endif %}
+
+github_username:
+  type: str
+  help: |
+    GitHub username or organization name.
+    Used for repository URLs in pyproject.toml and README badges.
+  placeholder: "janedoe"
+  validator: "{% if not github_username %}GitHub username is required{% endif %}"
+
+# ─────────────────────────────────────────────────────────
+# Python Configuration
+# ─────────────────────────────────────────────────────────
+
+python_version:
+  type: str
+  help: |
+    Minimum Python version for your project.
+    This sets requires-python and configures tooling.
+  default: "3.12"
+  choices:
+    "3.11 (maintenance)": "3.11"
+    "3.12 (stable, recommended)": "3.12"
+    "3.13 (latest)": "3.13"
+
+license:
+  type: str
+  help: |
+    Open source license for your project.
+    Select "None" for proprietary/unlicensed projects.
+  default: "MIT"
+  choices:
+    "MIT (permissive, simple)": "MIT"
+    "Apache-2.0 (permissive, patent protection)": "Apache-2.0"
+    "GPL-3.0 (copyleft)": "GPL-3.0"
+    "BSD-3-Clause (permissive)": "BSD-3-Clause"
+    "None (no license file)": "None"
+
+# ─────────────────────────────────────────────────────────
+# Optional Features
+# ─────────────────────────────────────────────────────────
+
+include_docker:
+  type: bool
+  help: |
+    Include Docker support?
+    Adds a multi-stage Dockerfile optimized for Python/UV.
+  default: true
+
+include_github_actions:
+  type: bool
+  help: |
+    Include GitHub Actions CI/CD?
+    Adds workflows for linting, testing, and type checking.
+  default: true
+
+include_cursor_rules:
+  type: bool
+  help: |
+    Include Cursor AI rules?
+    Adds .cursor/rules/ with Python best practices for AI assistance.
+  default: false
+
+# ─────────────────────────────────────────────────────────
+# Computed Variables (internal use)
+# ─────────────────────────────────────────────────────────
+
+_current_year:
+  type: str
+  default: "{{ '%Y' | strftime }}"
+  when: false

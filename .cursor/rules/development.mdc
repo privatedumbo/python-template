@@ -1,61 +1,44 @@
 ---
-description: Development workflow, commands, and tooling for the project
+description: Development workflow for the Copier template project
 alwaysApply: true
 ---
 
 # Development Workflow
 
 ## Package Management
-- Use `uv` for all dependency management and Python environment operations
-- Never use `pip` directly; always use `uv` commands
+- Use `uv` for dependency management
 - Sync dependencies: `uv sync --all-extras`
-
-## Task Runner
-- Use `poe` (poethepoet) for running project tasks
-- All poe tasks are defined in `scripts/app.toml`
-- Run tasks with: `uv run poe <task-name>`
 
 ## Available Commands
 
-### Dependency Management
 ```bash
-uv run poe sync           # Sync all dependencies
-uv run poe install-hooks  # Install pre-commit hooks
-```
-
-### Code Quality
-```bash
+uv run poe sync           # Sync dependencies
 uv run poe format         # Format code with ruff
-uv run poe lint           # Lint and auto-fix with ruff
-uv run poe check          # Run type checker (mypy)
-uv run poe test           # Run tests with pytest
+uv run poe lint           # Lint with ruff
+uv run poe check          # Type check with mypy
+uv run poe test           # Run template tests
+uv run poe flc            # Format + Lint + Check
+uv run poe flct           # Format + Lint + Check + Test
+uv run poe generate       # Generate test project to /tmp
 ```
 
-### Combined Workflows
-```bash
-uv run poe flc            # Format → Lint → Check (recommended before commits)
-uv run poe flct           # Format → Lint → Check → Test (full validation)
-```
+## Testing Template Changes
 
-## Code Quality Tools
+1. **Unit tests**: `uv run poe test`
+   - Tests template generation with various options
+   - Verifies generated files exist and have correct content
+   - Validates generated project passes linting/tests
 
-### Ruff
-- Line length: 88 characters (Black default)
-- Auto-fix enabled by default
-- Comprehensive linting ruleset (`select = ["ALL"]`)
-- Specific ignores: ANN (type hints), D (docstrings), COM812, ISC001
+2. **Manual testing**: `uv run poe generate`
+   - Creates project at `/tmp/test-project`
+   - Inspect generated files manually
 
-### MyPy
-- Strict mode enabled
-- Handles all type checking (not ruff)
+## Code Quality
 
-### Pytest
-- Code coverage enabled by default
-- Reports show missing coverage
-- Fails if tests don't cover changes
+### What Gets Checked
+- `tests/` - Python test code (ruff, mypy)
+- `template/` - Excluded from linting (contains Jinja templates)
 
-## Workflow Best Practices
-- Run `uv run poe flc` before committing changes
-- Run `uv run poe flct` for complete validation
-- Use pre-commit hooks for automated checks
-- Address linter errors immediately (don't ignore or suppress)
+### Pre-commit
+- Run `uv run poe flc` before committing
+- CI runs full validation on PRs

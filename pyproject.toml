@@ -1,22 +1,16 @@
 [project]
-name = "python-template"
+name = "python-copier-template"
 version = "0.0.1"
-description = "My python projects template. Trying to keep it lean."
+description = "A Copier template for Python projects with UV, Ruff, Mypy, and Pytest."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [ { name = "Franco Bocci", email = "francogbocci@gmail.com" } ]
 requires-python = ">=3.12"
 dependencies = []
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["python_template"]
-
 [dependency-groups]
 dev = [
+    "copier>=9.0.0",
     "mypy>=1.15.0",
     "poethepoet>=0.35.0",
     "pre-commit>=4.1.0",
@@ -26,33 +20,15 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = """\
-    --cov python_template \
-    --cov-report term-missing \
-    --no-cov-on-fail
-"""
-
-[tool.coverage.report]
-exclude_lines = [
-    # Don't complain about lines explicitly marked as uncoverable
-    "pragma: no cover",
-    # Don't complain about type checking code
-    "if TYPE_CHECKING:",
-    # Don't complain about not-implemented parts of code
-    "raise NotImplementedError",
-    # Don't complain about abstract methods, they aren't run
-    '@(abc\.)?abstractmethod',
-]
-# least covered on top, most covered on bottom
-# default is "name", and to reverse the order use "-cover"
-skip_covered = "true"
-sort = "cover"
+testpaths = ["tests"]
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py312"
 output-format = "full"
 line-length = 88
 fix = true
+# Exclude template directory from linting (it contains Jinja templates)
+exclude = ["template"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -68,6 +44,8 @@ ignore = [
     "ARG",      # "Unused function argument". Fixtures are often unused.
     "S101",     # "Use of `assert` detected"
     "S106",     # "Possible hardcoded password"
+    "S603",     # `subprocess` call - safe in tests
+    "S607",     # Starting a process with a partial executable path - safe in tests
     "PT004",    # Does not return anything, add leading underscore
     "PLR2004",  # Magic value used in comparison
 ]
@@ -78,6 +56,7 @@ namespace_packages = true
 explicit_package_bases = true
 plugins = []
 ignore_missing_imports = true
+exclude = ["template"]
 
 [tool.poe]
 include = "scripts/app.toml"

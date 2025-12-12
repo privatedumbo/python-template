@@ -1,0 +1,68 @@
+---
+description: Copier template development patterns and conventions
+globs: ["copier.yaml", "template/**"]
+alwaysApply: true
+---
+
+# Copier Template Development
+
+This is a Copier template project, not a Python application.
+
+## Template File Conventions
+
+### File Extensions
+- `.jinja` suffix → file will be rendered with Jinja2
+- No `.jinja` suffix → file copied as-is
+- Conditional filenames: `{% if condition %}filename{% endif %}.jinja`
+
+### Directory Names
+- `{{variable}}/` → directory name from user input
+- `{% if condition %}dirname{% endif %}/` → conditional directory
+
+## Jinja2 Patterns
+
+### Variables
+- All variables come from `copier.yaml` questions
+- Access with `{{ variable_name }}`
+- Use filters: `{{ name | lower | replace(' ', '_') }}`
+
+### Conditionals
+```jinja
+{% if include_feature %}
+content only when feature enabled
+{% endif %}
+
+{%- if condition -%}   {# strips surrounding whitespace #}
+```
+
+### Whitespace Control
+- `{%-` strips whitespace before
+- `-%}` strips whitespace after
+- Use for clean output without extra blank lines
+
+## copier.yaml Structure
+
+### Question Types
+- `type: str` - text input
+- `type: bool` - yes/no
+- `type: int` - number
+- `choices:` - selection list
+
+### Computed Variables
+```yaml
+_hidden_var:
+  default: "{{ other_var | filter }}"
+  when: false  # Not shown to user
+```
+
+### Validation
+```yaml
+variable:
+  validator: "{% if not variable %}Error message{% endif %}"
+```
+
+## Testing Templates
+
+- Tests use `copier.run_copy()` with `unsafe=True`
+- Test files live in `tests/`, not `template/tests/`
+- Test both enabled and disabled feature combinations

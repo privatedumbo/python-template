@@ -1,0 +1,91 @@
+# {{ project_slug | replace('_', ' ') | title }}
+
+{{ description }}
+
+---
+
+## 🎯 Core Features
+
+### Development Tools
+
+- 📦 UV - Ultra-fast Python package manager
+- 🚀 Poe the Poet - Modern command runner with powerful features
+- 💅 Ruff - Lightning-fast linter and formatter
+- 🔍 Mypy - Static type checker
+- 🧪 Pytest - Testing framework with fixtures and plugins
+
+### Infrastructure
+
+- 🛫 Pre-commit hooks
+{%- if include_docker %}
+- 🐳 Docker support with multi-stage builds
+{%- endif %}
+{%- if include_github_actions %}
+- 🔄 GitHub Actions CI/CD pipeline
+{%- endif %}
+
+
+## Usage
+
+This project uses [UV](https://docs.astral.sh/) as package manager. You need to have it installed in your system.
+
+Once you have that, you can run:
+
+```bash
+uv run poe sync
+```
+
+to create a virtual environment and install all the dependencies, including the development ones.
+
+You also need to install the pre-commit hooks with:
+
+```bash
+uv run poe install-hooks
+```
+
+### Formatting, Linting and Testing
+
+Format your code:
+
+```bash
+uv run poe format
+```
+
+Lint your code:
+
+```bash
+uv run poe lint
+```
+
+Static checks:
+
+```bash
+uv run poe check
+```
+
+Test your code:
+
+```bash
+uv run poe test
+```
+
+Do all of the above:
+
+```bash
+uv run poe flc  # Format, Lint and Check
+uv run poe flct # Format, Lint, Check and Test
+```
+{% if include_docker %}
+### Docker
+
+Build the Docker image with:
+
+```bash
+uv run poe dockerize
+```
+{% endif %}
+{% if include_github_actions %}
+### GitHub Actions
+
+This project includes a GitHub Action Workflow that runs tests and linters on every pull request.
+{% endif %}

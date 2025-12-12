@@ -1,6 +1,8 @@
-name: CI checks
+name: CI - Template Validation
 
 on:
+  push:
+    branches: [main]
   pull_request:
 
 defaults:
@@ -8,18 +10,102 @@ defaults:
     shell: bash
 
 jobs:
-  format-lint-test:
+  lint-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13"]
 
     steps:
       - name: 🛎️ Checkout
         uses: actions/checkout@v4
 
-      - name: ✅ validate code
-        env:
-          PY_VERSION: ${{ matrix.python-version }}
+      - name: 📦 Install uv
+        uses: astral-sh/setup-uv@v6
 
-        uses: ./.github/actions/validation
+      - name: 🐍 Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 🦾 Install dependencies
+        run: uv sync --all-extras
+
+      - name: 💅 Format check
+        run: uv run ruff format --check .
+
+      - name: 🔍 Lint
+        run: uv run ruff check .
+
+      - name: 📝 Type check
+        run: uv run mypy .
+
+      - name: 🧪 Run template tests
+        run: uv run pytest tests/ -v
+
+  test-generated-project:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+        include_docker: [true, false]
+        include_github_actions: [true, false]
+
+    steps:
+      - name: 🛎️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: 🐍 Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 🦾 Install copier
+        run: uv tool install copier
+
+      - name: 🏗️ Generate project from template
+        run: |
+          copier copy . /tmp/generated-project \
+            --defaults \
+            --data "project_slug=generated_test_project" \
+            --data "description=A generated test project" \
+            --data "author_name=CI Bot" \
+            --data "author_email=ci@example.com" \
+            --data "github_username=cibot" \
+            --data "python_version=${{ matrix.python-version }}" \
+            --data "license=MIT" \
+            --data "include_docker=${{ matrix.include_docker }}" \
+            --data "include_github_actions=${{ matrix.include_github_actions }}" \
+            --data "include_cursor_rules=false" \
+            --trust
+
+      - name: 📂 List generated files
+        run: find /tmp/generated-project -type f | head -50
+
+      - name: 🦾 Install generated project dependencies
+        run: |
+          cd /tmp/generated-project
+          uv sync --all-extras
+
+      - name: 💅 Format check generated project
+        run: |
+          cd /tmp/generated-project
+          uv run ruff format --check .
+
+      - name: 🔍 Lint generated project
+        run: |
+          cd /tmp/generated-project
+          uv run ruff check .
+
+      - name: 📝 Type check generated project
+        run: |
+          cd /tmp/generated-project
+          uv run mypy .
+
+      - name: 🧪 Run generated project tests
+        run: |
+          cd /tmp/generated-project
+          uv run pytest tests/ -v
