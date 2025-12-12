@@ -1,14 +1,14 @@
 ---
-description: Python 3.12+ best practices and modern syntax guidelines
+description: Python {{ python_version }}+ best practices and modern syntax guidelines
 alwaysApply: true
 ---
 
 # Python Version
-- Target Python >= 3.12
-- Use only features and syntax compatible with Python 3.12+
-- Leverage modern Python 3.12+ features when appropriate
+- Target Python >= {{ python_version }}
+- Use only features and syntax compatible with Python {{ python_version }}+
+- Leverage modern Python {{ python_version }}+ features when appropriate
 
-# Python 3.12+ Best Practices
+# Python {{ python_version }}+ Best Practices
 
 ## Type Hints
 - Use modern type hint syntax with PEP 604 union types: `str | None` instead of `Optional[str]`

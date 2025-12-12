@@ -1,0 +1,4 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_src_path: {{ _copier_conf.src_path | default('') }}
+_commit: {{ _copier_conf.vcs_ref | default('') }}
+{{ _copier_answers | to_nice_yaml -}}
