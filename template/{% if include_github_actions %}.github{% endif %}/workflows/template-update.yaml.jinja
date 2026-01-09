@@ -1,0 +1,68 @@
+name: Update from template
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Template version (leave empty for latest)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "{{ python_version }}"
+
+      - name: 📦 Install Copier
+        run: pip install copier
+
+      - name: 🔄 Update from template
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          {% raw %}VERSION="${{ github.event.inputs.version }}"{% endraw %}
+          if [ -n "$VERSION" ]; then
+            copier update --trust --vcs-ref="$VERSION" --defaults
+          else
+            copier update --trust --defaults
+          fi
+
+      - name: 📝 Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          commit-message: "chore: update from project template"
+          title: "chore: update from project template"
+          body: |
+            This PR updates the project from the upstream template.
+
+            ## What changed
+            Review the diff to see template updates.
+
+            ## How to review
+            1. Check that customizations weren't overwritten
+            2. Resolve any conflicts if present
+            3. Run tests locally before merging
+
+            ---
+            *Triggered by: {% raw %}@${{ github.actor }}{% endraw %}*
+            {% raw %}${{ github.event.inputs.version && format('*Version: {0}*', github.event.inputs.version) || '*Version: latest*' }}{% endraw %}
+          branch: chore/template-update
+          delete-branch: true
+          labels: |
+            dependencies
+            template
