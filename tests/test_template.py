@@ -22,11 +22,11 @@ def default_answers() -> dict[str, str | bool]:
         "author_name": "Test Author",
         "author_email": "test@example.com",
         "github_username": "testuser",
-        "python_version": "3.12",
+        "python_version": "3.13",
         "license": "MIT",
         "include_docker": True,
         "include_github_actions": True,
-        "include_cursor_rules": False,
+        "include_claude_code": False,
     }
 
 
@@ -168,13 +168,13 @@ def test_template_skips_github_actions_when_disabled(
     assert not (tmp_path / ".github").exists()
 
 
-def test_template_generates_cursor_rules_when_enabled(
+def test_template_generates_claude_code_when_enabled(
     template_path: Path,
     default_answers: dict[str, str | bool],
     tmp_path: Path,
 ) -> None:
-    """Test that Cursor rules are generated when include_cursor_rules is True."""
-    answers = {**default_answers, "include_cursor_rules": True}
+    """Test that CLAUDE.md is generated when include_claude_code is True."""
+    answers = {**default_answers, "include_claude_code": True}
     run_copy(
         str(template_path),
         tmp_path,
@@ -182,23 +182,19 @@ def test_template_generates_cursor_rules_when_enabled(
         unsafe=True,
     )
 
-    assert (tmp_path / ".cursor" / "rules").is_dir()
-    assert (tmp_path / ".cursor" / "rules" / "python.mdc").exists()
-    assert (tmp_path / ".cursor" / "rules" / "development.mdc").exists()
-    assert (tmp_path / ".cursor" / "rules" / "testing.mdc").exists()
-    assert (tmp_path / ".cursor" / "rules" / "database.mdc").exists()
+    assert (tmp_path / "CLAUDE.md").exists()
 
     # Verify Python version is templated
-    python_rules = (tmp_path / ".cursor" / "rules" / "python.mdc").read_text()
-    assert "Python 3.12" in python_rules
+    claude_md = (tmp_path / "CLAUDE.md").read_text()
+    assert "3.13" in claude_md
 
 
-def test_template_skips_cursor_rules_when_disabled(
+def test_template_skips_claude_code_when_disabled(
     template_path: Path,
     default_answers: dict[str, str | bool],
     tmp_path: Path,
 ) -> None:
-    """Test that Cursor rules are not generated when disabled."""
+    """Test that CLAUDE.md is not generated when disabled."""
     run_copy(
         str(template_path),
         tmp_path,
@@ -206,7 +202,7 @@ def test_template_skips_cursor_rules_when_disabled(
         unsafe=True,
     )
 
-    assert not (tmp_path / ".cursor").exists()
+    assert not (tmp_path / "CLAUDE.md").exists()
 
 
 def test_template_generates_license_mit(

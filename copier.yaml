@@ -87,11 +87,11 @@ python_version:
   help: |
     Minimum Python version for your project.
     This sets requires-python and configures tooling.
-  default: "3.12"
+  default: "3.13"
   choices:
-    "3.11 (maintenance)": "3.11"
-    "3.12 (stable, recommended)": "3.12"
-    "3.13 (latest)": "3.13"
+    "3.12 (maintenance)": "3.12"
+    "3.13 (stable, recommended)": "3.13"
+    "3.14 (latest)": "3.14"
 
 license:
   type: str
@@ -124,11 +124,11 @@ include_github_actions:
     Adds workflows for linting, testing, and type checking.
   default: true
 
-include_cursor_rules:
+include_claude_code:
   type: bool
   help: |
-    Include Cursor AI rules?
-    Adds .cursor/rules/ with Python best practices for AI assistance.
+    Include Claude Code configuration?
+    Adds a CLAUDE.md file with Python best practices for AI-assisted development.
   default: false
 
 # ─────────────────────────────────────────────────────────
