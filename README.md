@@ -22,7 +22,7 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 - 🛫 **Pre-commit hooks** - Automated code quality checks
 - 🐳 **Docker** - Multi-stage builds optimized for Python/UV
 - 🔄 **GitHub Actions** - CI/CD pipeline
-- 🤖 **Cursor AI rules** - Best practices for AI-assisted development
+- 🤖 **Claude Code** - Best practices for AI-assisted development
 
 ---
 
@@ -30,7 +30,7 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.12+
 - [Copier](https://copier.readthedocs.io/) (`pipx install copier` or `uv tool install copier`)
 
 ### Generate a New Project
@@ -54,11 +54,11 @@ Copier will ask you a series of questions to customize your project:
 | `author_name` | Author's full name | - |
 | `author_email` | Author's email | - |
 | `github_username` | GitHub username/organization | - |
-| `python_version` | Minimum Python version | 3.12 |
+| `python_version` | Minimum Python version | 3.13 |
 | `license` | Project license | MIT |
 | `include_docker` | Include Docker support | Yes |
 | `include_github_actions` | Include GitHub Actions CI/CD | Yes |
-| `include_cursor_rules` | Include Cursor AI rules | No |
+| `include_claude_code` | Include Claude Code configuration | No |
 
 ### Example
 
@@ -88,14 +88,14 @@ Let's configure your new project!
 🎤 GitHub username or organization name.
    johndoe
 🎤 Minimum Python version for your project.
-   3.12 (stable, recommended)
+   3.13 (stable, recommended)
 🎤 Open source license for your project.
    MIT (permissive, simple)
 🎤 Include Docker support?
    Yes
 🎤 Include GitHub Actions CI/CD?
    Yes
-🎤 Include Cursor AI rules?
+🎤 Include Claude Code configuration?
    No
 
     create  .copier-answers.yml
@@ -180,7 +180,7 @@ python-template/
 │   ├── scripts/
 │   │   └── app.toml.jinja
 │   ├── .github/             # GitHub Actions (conditional)
-│   ├── .cursor/rules/       # Cursor AI rules (conditional)
+│   ├── CLAUDE.md.jinja      # Claude Code config (conditional)
 │   ├── pyproject.toml.jinja
 │   ├── README.md.jinja
 │   ├── Dockerfile.jinja     # Docker support (conditional)
