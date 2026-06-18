@@ -1,6 +1,6 @@
-def foo() -> str:
-    return "bar"
+def hello() -> str:
+    return "Hello from {{ project_slug }}!"
 
 
 if __name__ == "__main__":
-    foo()
+    print(hello())  # noqa: T201

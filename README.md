@@ -17,12 +17,15 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 - 🔍 **[Mypy](https://mypy.readthedocs.io/)** - Static type checker
 - 🧪 **[Pytest](https://docs.pytest.org/)** - Testing framework with coverage
 
-### Infrastructure (Optional)
+### Always Included
 
 - 🛫 **Pre-commit hooks** - Automated code quality checks
+- 🤖 **AGENTS.md** - Best practices for AI-assisted development
+
+### Optional
+
 - 🐳 **Docker** - Multi-stage builds optimized for Python/UV
 - 🔄 **GitHub Actions** - CI/CD pipeline
-- 🤖 **Claude Code** - Best practices for AI-assisted development
 
 ---
 
@@ -30,7 +33,7 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 
 ### Prerequisites
 
-- Python 3.12+
+- Python 3.13+
 - [Copier](https://copier.readthedocs.io/) (`pipx install copier` or `uv tool install copier`)
 
 ### Generate a New Project
@@ -54,11 +57,11 @@ Copier will ask you a series of questions to customize your project:
 | `author_name` | Author's full name | - |
 | `author_email` | Author's email | - |
 | `github_username` | GitHub username/organization | - |
-| `python_version` | Minimum Python version | 3.13 |
+| `python_version` | Minimum Python version | 3.14 |
 | `license` | Project license | MIT |
 | `include_docker` | Include Docker support | Yes |
 | `include_github_actions` | Include GitHub Actions CI/CD | Yes |
-| `include_claude_code` | Include Claude Code configuration | No |
+
 
 ### Example
 
@@ -88,17 +91,15 @@ Let's configure your new project!
 🎤 GitHub username or organization name.
    johndoe
 🎤 Minimum Python version for your project.
-   3.13 (stable, recommended)
+   3.14 (stable, recommended)
 🎤 Open source license for your project.
    MIT (permissive, simple)
 🎤 Include Docker support?
    Yes
 🎤 Include GitHub Actions CI/CD?
    Yes
-🎤 Include Claude Code configuration?
-   No
-
     create  .copier-answers.yml
+    create  AGENTS.md
     create  .gitignore
     create  .pre-commit-config.yaml
     create  .python-version
@@ -180,7 +181,7 @@ python-template/
 │   ├── scripts/
 │   │   └── app.toml.jinja
 │   ├── .github/             # GitHub Actions (conditional)
-│   ├── CLAUDE.md.jinja      # Claude Code config (conditional)
+│   ├── AGENTS.md.jinja      # AI agent instructions (always included)
 │   ├── pyproject.toml.jinja
 │   ├── README.md.jinja
 │   ├── Dockerfile.jinja     # Docker support (conditional)

@@ -79,7 +79,6 @@ jobs:
             --data "license=MIT" \
             --data "include_docker=${{ matrix.include_docker }}" \
             --data "include_github_actions=${{ matrix.include_github_actions }}" \
-            --data "include_claude_code=false" \
             --trust
 
       - name: 📂 List generated files
