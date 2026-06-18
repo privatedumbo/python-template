@@ -26,7 +26,6 @@ def default_answers() -> dict[str, str | bool]:
         "license": "MIT",
         "include_docker": True,
         "include_github_actions": True,
-        "include_claude_code": False,
     }
 
 
@@ -49,6 +48,8 @@ def test_template_generates_successfully(
     assert (tmp_path / ".gitignore").exists()
     assert (tmp_path / ".pre-commit-config.yaml").exists()
     assert (tmp_path / "scripts" / "app.toml").exists()
+    assert (tmp_path / "AGENTS.md").exists()
+    assert (tmp_path / ".editorconfig").exists()
 
     # Check project structure
     assert (tmp_path / "test_project").is_dir()
@@ -168,33 +169,12 @@ def test_template_skips_github_actions_when_disabled(
     assert not (tmp_path / ".github").exists()
 
 
-def test_template_generates_claude_code_when_enabled(
+def test_template_generates_agents_md(
     template_path: Path,
     default_answers: dict[str, str | bool],
     tmp_path: Path,
 ) -> None:
-    """Test that CLAUDE.md is generated when include_claude_code is True."""
-    answers = {**default_answers, "include_claude_code": True}
-    run_copy(
-        str(template_path),
-        tmp_path,
-        data=answers,
-        unsafe=True,
-    )
-
-    assert (tmp_path / "CLAUDE.md").exists()
-
-    # Verify Python version is templated
-    claude_md = (tmp_path / "CLAUDE.md").read_text()
-    assert "3.13" in claude_md
-
-
-def test_template_skips_claude_code_when_disabled(
-    template_path: Path,
-    default_answers: dict[str, str | bool],
-    tmp_path: Path,
-) -> None:
-    """Test that CLAUDE.md is not generated when disabled."""
+    """Test that AGENTS.md is always generated."""
     run_copy(
         str(template_path),
         tmp_path,
@@ -202,7 +182,11 @@ def test_template_skips_claude_code_when_disabled(
         unsafe=True,
     )
 
-    assert not (tmp_path / "CLAUDE.md").exists()
+    assert (tmp_path / "AGENTS.md").exists()
+
+    # Verify Python version is templated
+    agents_md = (tmp_path / "AGENTS.md").read_text()
+    assert "3.13" in agents_md
 
 
 def test_template_generates_license_mit(

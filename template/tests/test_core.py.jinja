@@ -1,5 +1,5 @@
-from {{ project_slug }}.main import foo
+from {{ project_slug }}.main import hello
 
 
-def test_foo() -> None:
-    assert foo() == "bar"
+def test_hello() -> None:
+    assert hello() == "Hello from {{ project_slug }}!"

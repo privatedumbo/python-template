@@ -6,6 +6,10 @@ cmd = "uv sync --all-extras"
 help = "Install pre commit hooks."
 cmd = "uv run pre-commit install"
 
+[tool.poe.tasks.setup]
+help = "Sync dependencies and install pre-commit hooks."
+sequence = [ "sync", "install-hooks" ]
+
 [tool.poe.tasks.format]
 help = "Format code."
 cmd = "uv run ruff format ${POE_ROOT}"
@@ -16,11 +20,11 @@ cmd = "uv run ruff check --fix ${POE_ROOT}"
 
 [tool.poe.tasks.check]
 help = "Run type checker."
-cmd = "uv run mypy ${POE_ROOT}"
+cmd = "uv run mypy {{ project_slug }}"
 
 [tool.poe.tasks.test]
 help = "Run tests."
-cmd = "uv run pytest ${POE_ROOT}"
+cmd = "uv run pytest"
 
 [tool.poe.tasks.flc]
 help = "`flc`: Format, lint, and check."

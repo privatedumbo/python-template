@@ -29,19 +29,13 @@
 
 This project uses [UV](https://docs.astral.sh/) as package manager. You need to have it installed in your system.
 
-Once you have that, you can run:
+Once you have that, run:
 
 ```bash
-uv run poe sync
+uv run poe setup
 ```
 
-to create a virtual environment and install all the dependencies, including the development ones.
-
-You also need to install the pre-commit hooks with:
-
-```bash
-uv run poe install-hooks
-```
+This will create a virtual environment, install all dependencies, and set up pre-commit hooks.
 
 ### Formatting, Linting and Testing
 

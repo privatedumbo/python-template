@@ -17,7 +17,7 @@ python-template/
 │   ├── *.jinja          # Jinja templates (rendered)
 │   └── *                # Static files (copied as-is)
 ├── tests/               # Tests for template generation
-└── CLAUDE.md            # This file
+└── AGENTS.md            # This file
 ```
 
 ## Template File Conventions
@@ -35,6 +35,7 @@ python-template/
 ### Available Commands
 ```bash
 uv run poe sync           # Sync dependencies
+uv run poe setup          # Sync + install hooks
 uv run poe format         # Format code with ruff
 uv run poe lint           # Lint with ruff
 uv run poe check          # Type check with mypy
