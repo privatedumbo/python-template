@@ -30,33 +30,41 @@ python-template/
 ## Development Workflow
 
 ### Package Management
-- Use `uv` for all dependency management — never use `pip` directly
+- Use `uv` for all dependency management - never use `pip` directly
 
 ### Available Commands
 ```bash
-uv run poe sync           # Sync dependencies
-uv run poe setup          # Sync + install hooks
-uv run poe format         # Format code with ruff
-uv run poe lint           # Lint with ruff
-uv run poe check          # Type check with mypy
-uv run poe test           # Run template tests
-uv run poe flc            # Format + Lint + Check
-uv run poe flct           # Format + Lint + Check + Test
-uv run poe generate       # Generate test project to /tmp
+uv run --locked poe sync           # Sync dependencies
+uv run --locked poe setup          # Sync + install hooks
+uv run --locked poe format         # Format code with ruff
+uv run --locked poe lint           # Lint with ruff
+uv run --locked poe check          # Type check with mypy
+uv run --locked poe test           # Run template tests
+uv run --locked poe flc            # Fix lint + Format + Check
+uv run --locked poe flct           # Fix lint + Format + Check + Test
+uv run --locked poe validate       # Non-mutating checks + tests
+uv run --locked poe generate       # Generate test project to /tmp
 ```
 
 ### Testing Changes
-1. **Unit tests**: `uv run poe test` — tests template generation with various options
-2. **Manual testing**: `uv run poe generate` — creates project at `/tmp/test-project`
+1. **Unit tests**: `uv run --locked poe test` - tests template generation with various options
+2. **Manual testing**: `uv run --locked poe generate` - creates project at `/tmp/test-project`
 
 ### Code Quality
-- `tests/` — checked by ruff and mypy
-- `template/` — excluded from linting (contains Jinja templates)
-- Run `uv run poe flc` before committing
+- `tests/` - checked by ruff and mypy
+- `template/` - excluded from linting (contains Jinja templates)
+- Run `uv run --locked poe validate` before committing
 
 ## Testing Patterns
 
-Tests verify that the Copier template generates valid projects using `copier.run_copy()` with `unsafe=True`.
+Tests verify generated projects using `copier.run_copy()` with `unsafe=True` and
+`vcs_ref="HEAD"` so the proposed template is tested. The generated package uses
+`src/` layout. Use the uv version pinned in `uv.toml`; commit lockfile changes
+when updating dependencies.
+
+Run Docker regression tests with
+`RUN_DOCKER_TESTS=1 uv run --locked pytest -m docker -v` when changing packaging or
+container behavior. These require a running Docker daemon.
 
 Key patterns:
 - Test all boolean option combinations (enabled/disabled)

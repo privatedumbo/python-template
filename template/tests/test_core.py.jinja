@@ -1,5 +1,12 @@
-from {{ project_slug }}.main import hello
+import pytest
+
+from {{ project_slug }}.main import hello, main
 
 
 def test_hello() -> None:
     assert hello() == "Hello from {{ project_slug }}!"
+
+
+def test_main(capsys: pytest.CaptureFixture[str]) -> None:
+    main()
+    assert capsys.readouterr().out == "Hello from {{ project_slug }}!\n"

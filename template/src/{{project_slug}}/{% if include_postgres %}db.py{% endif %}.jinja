@@ -1,0 +1,34 @@
+"""Shared database metadata and environment-based connection configuration."""
+
+import os
+
+from sqlalchemy import URL, MetaData, make_url
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """Base for application models, shared with Alembic."""
+
+    metadata = MetaData(
+        naming_convention={
+            "ix": "ix_%(column_0_label)s",
+            "uq": "uq_%(table_name)s_%(column_0_name)s",
+            "ck": "ck_%(table_name)s_%(constraint_name)s",
+            "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+            "pk": "pk_%(table_name)s",
+        }
+    )
+
+
+def get_database_url() -> URL:
+    """Read DATABASE_URL or the POSTGRES_* settings, without opening a connection."""
+    if database_url := os.environ.get("DATABASE_URL"):
+        return make_url(database_url)
+    return URL.create(
+        "postgresql+psycopg",
+        username=os.environ["POSTGRES_USER"],
+        password=os.environ["POSTGRES_PASSWORD"],
+        host=os.environ.get("POSTGRES_HOST", "localhost"),
+        port=int(os.environ.get("POSTGRES_PORT", "5432")),
+        database=os.environ["POSTGRES_DB"],
+    )

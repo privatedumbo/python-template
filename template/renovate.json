@@ -1,0 +1,54 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "pre-commit": { "enabled": true },
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "uv",
+        "ghcr.io/astral-sh/uv"
+      ],
+      "groupName": "uv toolchain"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|\\/)uv\\.toml$/"
+      ],
+      "matchStrings": [
+        "required-version\\s*=\\s*\"==(?<currentValue>[0-9.]+)\""
+      ],
+      "depNameTemplate": "uv",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/Dockerfile/"
+      ],
+      "matchStrings": [
+        "ARG UV_VERSION=(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "uv",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/template-update\\.yaml(?:\\.jinja)?$/"
+      ],
+      "matchStrings": [
+        "copier==(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "copier",
+      "datasourceTemplate": "pypi"
+    }
+  ]
+}

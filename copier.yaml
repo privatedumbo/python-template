@@ -11,11 +11,11 @@ _message_before_copy: |
   ═══════════════════════════════════════════════════════
 
   This template creates a modern Python project with:
-  • UV for fast dependency management
+  • uv for fast dependency management
   • Ruff for linting and formatting
-  • Mypy for type checking
-  • Pytest for testing
-  • Pre-commit hooks
+  • mypy for type checking
+  • pytest for testing
+  • prek for commit hooks
 
   Let's configure your new project!
 
@@ -26,24 +26,25 @@ _message_before_copy: |
 project_slug:
   type: str
   help: |
-    Project name (lowercase, underscores allowed).
-    This will be used as the package name and directory name.
+    Project name
+    Sets the package name and directory name.
+    Start with a lowercase letter; use lowercase letters, numbers, and underscores.
     Examples: my_project, data_pipeline, api_client
-  placeholder: "my_awesome_project"
+  placeholder: "my_project"
   validator: >-
     {% if not project_slug %}
-    Project name is required
+    Project name is required.
     {% elif not project_slug | regex_search('^[a-z][a-z0-9_]*$') %}
-    Must start with a letter and contain only lowercase letters, numbers, and underscores
+    Project name must start with a lowercase letter and contain only lowercase letters, numbers, and underscores.
     {% endif %}
 
 description:
   type: str
   help: |
-    A short description of your project (one line).
-    This appears in pyproject.toml and the README header.
+    Project description
+    Adds a one-line summary to pyproject.toml and the README.
   default: "A Python project"
-  placeholder: "A blazingly fast data processing library"
+  placeholder: "A library for processing data"
 
 # ─────────────────────────────────────────────────────────
 # Author Information
@@ -52,51 +53,54 @@ description:
 author_name:
   type: str
   help: |
-    Your full name.
-    Used in pyproject.toml authors and LICENSE file.
+    Author name
+    Sets the author name in pyproject.toml and the LICENSE file, if included.
   placeholder: "Jane Doe"
-  validator: "{% if not author_name %}Author name is required{% endif %}"
+  validator: "{% if not author_name %}Author name is required.{% endif %}"
 
 author_email:
   type: str
   help: |
-    Your email address.
-    Used in pyproject.toml authors field.
+    Author email
+    Sets the author email address in pyproject.toml.
   placeholder: "jane@example.com"
   validator: >-
     {% if not author_email %}
-    Email is required
+    Author email is required.
     {% elif not author_email | regex_search('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$') %}
-    Please enter a valid email address
+    Enter a valid email address.
     {% endif %}
 
 github_username:
   type: str
   help: |
-    GitHub username or organization name.
-    Used for repository URLs in pyproject.toml and README badges.
+    GitHub username or organization
+    Sets the repository owner for project links and README badges.
   placeholder: "janedoe"
-  validator: "{% if not github_username %}GitHub username is required{% endif %}"
+  validator: "{% if not github_username %}GitHub username or organization is required.{% endif %}"
 
 # ─────────────────────────────────────────────────────────
-# Python Configuration
+# Project Configuration
 # ─────────────────────────────────────────────────────────
 
 python_version:
   type: str
   help: |
-    Minimum Python version for your project.
-    This sets requires-python and configures tooling.
+    Python version
+    Sets the minimum supported version and the development interpreter.
+    Uses the same version for tooling, CI, and Docker, where included.
   default: "3.14"
   choices:
-    "3.13 (maintenance)": "3.13"
-    "3.14 (stable, recommended)": "3.14"
+    "3.13": "3.13"
+    "3.14 (recommended)": "3.14"
+    "3.15": "3.15"
 
 license:
   type: str
   help: |
-    Open source license for your project.
-    Select "None" for proprietary/unlicensed projects.
+    Project license
+    Adds the selected license to the LICENSE file and package metadata.
+    Select "None" to omit both.
   default: "MIT"
   choices:
     "MIT (permissive, simple)": "MIT"
@@ -113,15 +117,22 @@ include_docker:
   type: bool
   help: |
     Include Docker support?
-    Adds a multi-stage Dockerfile optimized for Python/UV.
+    Adds a multi-stage Dockerfile using uv and a .dockerignore file.
   default: true
 
 include_github_actions:
   type: bool
   help: |
-    Include GitHub Actions CI/CD?
-    Adds workflows for linting, testing, and type checking.
+    Include GitHub Actions workflows?
+    Adds workflows for linting, formatting checks, type checking, testing, and template updates.
   default: true
+
+include_postgres:
+  type: bool
+  help: |
+    Include PostgreSQL and Alembic migrations?
+    Adds PostgreSQL 18 through Docker Compose, database configuration, and migration commands.
+  default: false
 
 # ─────────────────────────────────────────────────────────
 # Computed Variables (internal use)

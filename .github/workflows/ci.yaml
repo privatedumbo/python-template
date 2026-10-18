@@ -12,99 +12,63 @@ defaults:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.13", "3.14"]
-
     steps:
-      - name: 🛎️ Checkout
-        uses: actions/checkout@v6
-
-      - name: 📦 Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: 🐍 Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
         with:
-          python-version: ${{ matrix.python-version }}
+          version-file: uv.toml
+          python-version: "3.13"
+      - name: Install locked template dependencies
+        run: uv sync --locked
+      # These tests generate and validate projects on 3.13, 3.14, and 3.15.
+      - name: Validate template and generated projects
+        run: uv run --locked poe validate
 
-      - name: 🦾 Install dependencies
-        run: uv sync --all-extras
-
-      - name: 💅 Format check
-        run: uv run ruff format --check .
-
-      - name: 🔍 Lint
-        run: uv run ruff check .
-
-      - name: 📝 Type check
-        run: uv run mypy .
-
-      - name: 🧪 Run template tests
-        run: uv run pytest tests/ -v
-
-  test-generated-project:
+  test-generated-options:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.13"]
         include_docker: [true, false]
         include_github_actions: [true, false]
-
+        include_postgres: [true, false]
     steps:
-      - name: 🛎️ Checkout
-        uses: actions/checkout@v6
-
-      - name: 📦 Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: 🐍 Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: 🦾 Install copier
-        run: uv tool install copier
-
-      - name: 🏗️ Generate project from template
+          version-file: uv.toml
+          python-version: "3.14"
+      - run: uv sync --locked
+      - name: Generate the current template
         run: |
-          copier copy . /tmp/generated-project \
-            --defaults \
-            --data "project_slug=generated_test_project" \
-            --data "description=A generated test project" \
-            --data "author_name=CI Bot" \
-            --data "author_email=ci@example.com" \
-            --data "github_username=cibot" \
-            --data "python_version=${{ matrix.python-version }}" \
-            --data "license=MIT" \
+          uv run --locked copier copy . /tmp/generated-project \
+            --vcs-ref=HEAD --defaults --trust \
+            --data project_slug=generated_test_project \
+            --data author_name=CI \
+            --data author_email=ci@example.com \
+            --data github_username=example \
             --data "include_docker=${{ matrix.include_docker }}" \
             --data "include_github_actions=${{ matrix.include_github_actions }}" \
-            --trust
-
-      - name: 📂 List generated files
-        run: find /tmp/generated-project -type f | head -50
-
-      - name: 🦾 Install generated project dependencies
+            --data "include_postgres=${{ matrix.include_postgres }}"
+      # A new project needs its own lock; all later checks must preserve it.
+      - name: Bootstrap generated lockfile
+        working-directory: /tmp/generated-project
+        run: uv lock
+      - name: Validate generated project
+        working-directory: /tmp/generated-project
         run: |
-          cd /tmp/generated-project
-          uv sync --all-extras
+          uv sync --locked
+          uv run --locked poe validate
 
-      - name: 💅 Format check generated project
-        run: |
-          cd /tmp/generated-project
-          uv run ruff format --check .
-
-      - name: 🔍 Lint generated project
-        run: |
-          cd /tmp/generated-project
-          uv run ruff check .
-
-      - name: 📝 Type check generated project
-        run: |
-          cd /tmp/generated-project
-          uv run mypy .
-
-      - name: 🧪 Run generated project tests
-        run: |
-          cd /tmp/generated-project
-          uv run pytest tests/ -v
+  test-docker:
+    runs-on: ubuntu-latest
+    env:
+      RUN_DOCKER_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version-file: uv.toml
+          python-version: "3.14"
+      - run: uv sync --locked
+      - name: Build and run generated images
+        run: uv run --locked pytest -m docker -v

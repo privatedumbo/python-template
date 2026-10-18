@@ -2,5 +2,9 @@ def hello() -> str:
     return "Hello from {{ project_slug }}!"
 
 
+def main() -> None:
+    print(hello())
+
+
 if __name__ == "__main__":
-    print(hello())  # noqa: T201
+    main()

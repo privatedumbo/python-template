@@ -1,3 +1,4 @@
+exclude: ^template/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -16,9 +17,19 @@ repos:
 
   - repo: local
     hooks:
-      - id: flc
-        name: flc
+      - id: ruff-check
+        name: Ruff fixes
         language: system
-        entry: uv run poe flc
+        entry: uv run --locked ruff check --fix --force-exclude
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: Ruff format
+        language: system
+        entry: uv run --locked ruff format --force-exclude
+        types_or: [python, pyi]
+      - id: mypy
+        name: Mypy
+        language: system
+        entry: uv run --locked mypy tests
         pass_filenames: false
-        types: [python]
+        files: '(^|/)(pyproject\.toml|uv\.lock|uv\.toml)$|\.pyi?$'

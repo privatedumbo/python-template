@@ -2,84 +2,158 @@
 
 {{ description }}
 
----
+Python {{ python_version }}+, uv, Ruff, strict mypy, pytest, and prek. Application
+code lives in `src/{{ project_slug }}/`; tests import the installed package.
 
-## 🎯 Core Features
+## Setup
 
-### Development Tools
-
-- 📦 UV - Ultra-fast Python package manager
-- 🚀 Poe the Poet - Modern command runner with powerful features
-- 💅 Ruff - Lightning-fast linter and formatter
-- 🔍 Mypy - Static type checker
-- 🧪 Pytest - Testing framework with fixtures and plugins
-
-### Infrastructure
-
-- 🛫 Pre-commit hooks
-{%- if include_docker %}
-- 🐳 Docker support with multi-stage builds
-{%- endif %}
-{%- if include_github_actions %}
-- 🔄 GitHub Actions CI/CD pipeline
-{%- endif %}
-
-
-## Usage
-
-This project uses [UV](https://docs.astral.sh/) as package manager. You need to have it installed in your system.
-
-Once you have that, run:
+Install the uv version required by `uv.toml` using your usual uv installer.
+For a newly generated project:
 
 ```bash
-uv run poe setup
+git init
+uv lock
+uv run --locked poe setup
 ```
 
-This will create a virtual environment, install all dependencies, and set up pre-commit hooks.
+Commit `uv.lock` with the project. It belongs to this project, not the template.
+For an existing checkout, run `uv run --locked poe setup` using the committed lock.
+`uv.toml`, the dev dependency, and Docker's uv version are updated together.
 
-### Formatting, Linting and Testing
-
-Format your code:
+Run the application:
 
 ```bash
-uv run poe format
+uv run --locked python -m {{ project_slug }}
 ```
 
-Lint your code:
+## Development
 
-```bash
-uv run poe lint
-```
+Use `uv run --locked poe <task>`:
 
-Static checks:
+| Task | Purpose |
+| --- | --- |
+| `lint` | Apply Ruff lint fixes |
+| `format` | Format code |
+| `check` | Strict mypy checks over source and tests |
+| `test` | Fast pytest run |
+| `test-cov` | Tests with branch coverage and an XML report |
+| `flc` | Fix lint, format, and check types |
+| `flct` | Fix lint, format, check types, and test |
+| `validate` | Read-only lint/format checks, type checking, and coverage tests |
+| `sync` | Install committed dependency versions |
+| `install-hooks` | Install prek commit hooks |
 
-```bash
-uv run poe check
-```
+Prek runs Ruff on changed files and mypy over the project. The conventional
+`.pre-commit-config.yaml` format is retained. Run all hooks with
+`uv run --locked prek run --all-files`. CI uses `validate`, so it rejects code
+that needs fixing. `uv add`, `uv remove`, and deliberate dependency upgrades are
+expected to update the lockfile; commit those changes together.
 
-Test your code:
+Coverage reports include branches. Choose a coverage floor for your project's
+behavior instead of inheriting an arbitrary template percentage. Add specific
+coverage exclusions through `exclude_also` to preserve coverage.py's defaults.
 
-```bash
-uv run poe test
-```
+## Dependency updates
 
-Do all of the above:
-
-```bash
-uv run poe flc  # Format, Lint and Check
-uv run poe flct # Format, Lint, Check and Test
-```
+Enable the Renovate GitHub App for this repository. `renovate.json` configures
+updates for dependencies, Actions, hooks, and Docker where present, plus lockfile
+maintenance. The uv configuration, dependency, and Docker image version should
+move together. Review updates and require successful validation before merging.
 {% if include_docker %}
-### Docker
-
-Build the Docker image with:
+## Docker
 
 ```bash
-uv run poe dockerize
+uv run --locked poe dockerize
+docker run --rm {{ project_slug }}
 ```
+
+The image uses the committed lockfile, installs the package without development
+dependencies, and runs as UID 10001. Both stages share the same Python base.
+Add required runtime assets or explicitly selected extras when your application
+needs them. Local environments, caches, and `.env` files are excluded from the
+build context. A lockfile must exist before building.
+{% endif %}
+{% if include_postgres %}
+## PostgreSQL and migrations
+
+PostgreSQL 18 runs locally through Docker Compose. Python and Alembic run in the
+uv environment; the application Dockerfile is optional.
+
+```bash
+cp .env.example .env
+uv run --locked poe db:up
+uv run --locked poe db:setup
+```
+
+The example credentials are for local development only. `.env` is ignored by
+Git. Change `POSTGRES_PORT` if another project uses port 5432. The published
+database port binds only to localhost. PostgreSQL 18 data lives in a named
+volume mounted at `/var/lib/postgresql`.
+
+| Task | Purpose |
+| --- | --- |
+| `db:up` | Start PostgreSQL and wait for its health check |
+| `db:down` | Remove the local database container, preserving data |
+| `db:destroy` | Remove the local database container and permanently delete its data |
+| `db:setup` | Apply migrations with `alembic upgrade head` |
+
+These Compose commands use the dedicated `compose.db.yaml` file and affect only
+its local database resources. `db:setup` requires a running database; it does not
+start one or create migration files. It is safe to repeat when already at head.
+On a new project there are no application tables or migrations yet.
+
+Define models using `Base` from `{{ project_slug }}.db`, then import their modules
+in `migrations/env.py` so Alembic can discover their metadata. Name check
+constraints explicitly to match the base's constraint naming convention.
+
+```bash
+uv run --locked --env-file .env alembic revision --autogenerate -m "Add initial tables"
+# Review the generated migration before applying it.
+uv run --locked poe db:setup
+uv run --locked --env-file .env alembic current
+```
+
+New revisions are linted and formatted with Ruff. Commit the migration files.
+Application code can call `get_database_url()` from `{{ project_slug }}.db` and
+pass the result to SQLAlchemy's `create_engine()`. Both application code and
+migrations read the same `POSTGRES_*` variables, or a `DATABASE_URL` override
+using the `postgresql+psycopg://` scheme. Load `.env` for local application runs:
+
+```bash
+uv run --locked --env-file .env python -m {{ project_slug }}
+```
+
+Environment variables supplied by the shell take precedence over `.env`. Compose
+uses `POSTGRES_*` to initialize the local server; changing credentials after the
+data volume exists does not change existing database users. `DATABASE_URL`
+overrides only the application/migration connection, not the local container.
+{% if include_docker %}
+
+The application image includes Alembic and migrations. Run migrations as an
+explicit deployment step, for example `docker run --rm --env-file .env
+{{ project_slug }} alembic upgrade head`, with connection settings reachable from
+inside the container. `localhost` inside a container is not the host database.
+{% endif %}
 {% endif %}
 {% if include_github_actions %}
-### GitHub Actions
+## CI and template updates
 
-This project includes a GitHub Action Workflow that runs tests and linters on every pull request.
+PR validation checks formatting, lint, types, and tests against `uv.lock`.
+The manual **Update from template** workflow updates the template, refreshes the
+project lockfile, and validates before opening a PR. Its PR body links to the
+successful validation run. PRs opened with `GITHUB_TOKEN` do not automatically
+trigger the ordinary PR checks; edits made afterward need fresh validation.
+Repositories requiring those PR checks can use a separately configured GitHub
+App token for PR creation. Enable GitHub Actions' permission to create PRs in
+the repository settings before using the update workflow.
 {% endif %}
+
+## Updating older projects
+
+When adopting the `src/` layout, merge your existing application modules into
+`src/{{ project_slug }}/` and resolve Copier conflicts before validating. Remove
+the obsolete top-level package only after preserving its local changes. Update
+custom imports, build steps, and Docker asset copies that refer to the old path.
+Run `uv lock`, `uv sync --locked`, and `uv run --locked poe validate`, then check
+your application entry point. Replace old pre-commit hooks with
+`uv run --locked prek install`.

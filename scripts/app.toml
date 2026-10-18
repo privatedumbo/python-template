@@ -1,35 +1,51 @@
 [tool.poe.tasks.sync]
-help = "Sync dependencies."
-cmd = "uv sync --all-extras"
+help = "Install the committed dependency versions."
+cmd = "uv sync --locked"
 
 [tool.poe.tasks.install-hooks]
-help = "Install pre commit hooks."
-cmd = "uv run pre-commit install"
+help = "Install prek hooks."
+cmd = "uv run --locked prek install"
+
+[tool.poe.tasks.setup]
+help = "Sync dependencies and install hooks."
+sequence = ["sync", "install-hooks"]
 
 [tool.poe.tasks.format]
 help = "Format code."
-cmd = "uv run ruff format ${POE_ROOT}"
+cmd = "uv run --locked ruff format ."
 
 [tool.poe.tasks.lint]
-help = "Lint code."
-cmd = "uv run ruff check --fix ${POE_ROOT}"
+help = "Lint and fix code."
+cmd = "uv run --locked ruff check --fix ."
+
+[tool.poe.tasks.format-check]
+help = "Check formatting without changing files."
+cmd = "uv run --locked ruff format --check ."
+
+[tool.poe.tasks.lint-check]
+help = "Check lint without changing files."
+cmd = "uv run --locked ruff check --no-fix ."
 
 [tool.poe.tasks.check]
-help = "Run type checker."
-cmd = "uv run mypy ${POE_ROOT}"
+help = "Check types in source and tests."
+cmd = "uv run --locked mypy tests"
 
 [tool.poe.tasks.test]
 help = "Run tests."
-cmd = "uv run pytest ${POE_ROOT}"
+cmd = "uv run --locked pytest"
 
 [tool.poe.tasks.flc]
-help = "`flc`: Format, lint, and check."
-sequence = [ "format", "lint", "check" ]
+help = "Fix lint, format, and check types."
+sequence = ["lint", "format", "check"]
 
 [tool.poe.tasks.flct]
-help = "`flct`: Format, lint, check, and test."
-sequence = [ "format", "lint", "check", "test" ]
+help = "Fix lint, format, check types, and test."
+sequence = ["flc", "test"]
+
+[tool.poe.tasks.validate]
+help = "Validate without modifying source or the lockfile."
+sequence = ["lint-check", "format-check", "check", "test"]
 
 [tool.poe.tasks.generate]
-help = "Generate a project from the template (for manual testing)."
-cmd = "copier copy . /tmp/test-project --defaults --force"
+help = "Generate a project in /tmp/test-project."
+cmd = "uv run --locked copier copy . /tmp/test-project --vcs-ref=HEAD --defaults --data project_slug=test_project --data author_name=Developer --data author_email=dev@example.com --data github_username=example"
