@@ -1,0 +1,90 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "pre-commit": { "enabled": true },
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "uv",
+        "ghcr.io/astral-sh/uv"
+      ],
+      "groupName": "uv toolchain"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^template\\/.*compose\\.db\\.yaml.*\\.jinja$/"
+      ],
+      "matchStrings": [
+        "image:\\s*(?<depName>postgres):(?<currentValue>[0-9.]+)"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|\\/)uv\\.toml$/"
+      ],
+      "matchStrings": [
+        "required-version\\s*=\\s*\"==(?<currentValue>[0-9.]+)\""
+      ],
+      "depNameTemplate": "uv",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/Dockerfile/"
+      ],
+      "matchStrings": [
+        "ARG UV_VERSION=(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "uv",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/template-update\\.yaml(?:\\.jinja)?$/"
+      ],
+      "matchStrings": [
+        "copier==(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "copier",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^template\\/pyproject\\.toml\\.jinja$/"
+      ],
+      "matchStrings": [
+        "\"(?<depName>[A-Za-z0-9_-]+)==(?<currentValue>[0-9][A-Za-z0-9.]*)\""
+      ],
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^template\\/.*\\.ya?ml(?:\\.jinja)?$/"
+      ],
+      "matchStrings": [
+        "uses:\\s*(?<depName>[A-Za-z0-9_-]+/[A-Za-z0-9_-]+)@(?<currentValue>v[0-9.]+)"
+      ],
+      "datasourceTemplate": "github-tags"
+    }
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/.venv/**"
+  ]
+}

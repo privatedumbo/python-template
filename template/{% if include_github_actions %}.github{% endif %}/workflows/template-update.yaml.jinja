@@ -15,52 +15,65 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+    env:
+      PY_VERSION: "{{ python_version }}"
     steps:
-      - name: 🛎️ Checkout
+      - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
+          version-file: uv.toml
           python-version: "{{ python_version }}"
 
-      - name: 📦 Install Copier
-        run: pip install copier
-
-      - name: 🔄 Update from template
+      - name: Update from template
+        env:
+          TEMPLATE_REF: {% raw %}${{ inputs.version }}{% endraw %}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          {% raw %}VERSION="${{ github.event.inputs.version }}"{% endraw %}
-          if [ -n "$VERSION" ]; then
-            copier update --trust --vcs-ref="$VERSION" --defaults
-          else
-            copier update --trust --defaults
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          args=(update --trust --defaults)
+          if [ -n "$TEMPLATE_REF" ]; then
+            args+=(--vcs-ref="$TEMPLATE_REF")
+          fi
+          uv tool run --from copier==9.19.1 copier "${args[@]}"
+          git diff --check
+          if [ -n "$(git ls-files --others --exclude-standard '*.rej')" ]; then
+            echo "Copier left conflicts; resolve the update locally."
+            exit 1
           fi
 
-      - name: 📝 Create Pull Request
+      # The template update may require a newer uv and different dependencies.
+      - name: Install the updated uv version
+        uses: astral-sh/setup-uv@v7
+        with:
+          version-file: uv.toml
+          python-version: "{{ python_version }}"
+
+      - name: Refresh the project lockfile
+        run: uv lock
+
+      # GITHUB_TOKEN-created PRs do not trigger the ordinary PR workflow.
+      - name: Validate updated project before opening its PR
+        uses: ./.github/actions/validation
+
+      - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
           token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
           commit-message: "chore: update from project template"
           title: "chore: update from project template"
           body: |
-            This PR updates the project from the upstream template.
+            Updates the project template and refreshes uv.lock.
 
-            ## What changed
-            Review the diff to see template updates.
+            Formatting, lint, types, and tests passed before this PR was opened.
+            Validation run: {% raw %}${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}{% endraw %}
 
-            ## How to review
-            1. Check that customizations weren't overwritten
-            2. Resolve any conflicts if present
-            3. Run tests locally before merging
-
-            ---
-            *Triggered by: {% raw %}@${{ github.actor }}{% endraw %}*
-            {% raw %}${{ github.event.inputs.version && format('*Version: {0}*', github.event.inputs.version) || '*Version: latest*' }}{% endraw %}
+            PR workflows are not automatically triggered by GITHUB_TOKEN.
+            Review conflicts and application-specific changes before merging.
           branch: chore/template-update
           delete-branch: true
           labels: |

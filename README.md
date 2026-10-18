@@ -19,13 +19,14 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 
 ### Always Included
 
-- 🛫 **Pre-commit hooks** - Automated code quality checks
+- 🛫 **Prek hooks** - Automated code quality checks
 - 🤖 **AGENTS.md** - Best practices for AI-assisted development
 
 ### Optional
 
-- 🐳 **Docker** - Multi-stage builds optimized for Python/UV
-- 🔄 **GitHub Actions** - CI/CD pipeline
+- 🐳 **Docker** - Multi-stage builds using uv
+- 🔄 **GitHub Actions** - Validation and template-update workflows
+- 🐘 **PostgreSQL** - PostgreSQL 18 through Compose, SQLAlchemy, and Alembic migrations
 
 ---
 
@@ -34,7 +35,7 @@ A [Copier](https://copier.readthedocs.io/) template for modern Python projects. 
 ### Prerequisites
 
 - Python 3.13+
-- [Copier](https://copier.readthedocs.io/) (`pipx install copier` or `uv tool install copier`)
+- [Copier](https://copier.readthedocs.io/) (`uv tool install copier`)
 
 ### Generate a New Project
 
@@ -57,11 +58,16 @@ Copier will ask you a series of questions to customize your project:
 | `author_name` | Author's full name | - |
 | `author_email` | Author's email | - |
 | `github_username` | GitHub username/organization | - |
-| `python_version` | Minimum Python version | 3.14 |
+| `python_version` | Minimum Python version and development, CI, and Docker interpreter | 3.14 |
 | `license` | Project license | MIT |
 | `include_docker` | Include Docker support | Yes |
-| `include_github_actions` | Include GitHub Actions CI/CD | Yes |
+| `include_github_actions` | Include GitHub Actions workflows | Yes |
+| `include_postgres` | Include PostgreSQL 18, SQLAlchemy, and Alembic migrations | No |
 
+Yes/no prompts mark the default selected by Enter with an uppercase letter:
+`(Y/n)` for Docker and GitHub Actions, `(y/N)` for PostgreSQL. Both uppercase and
+lowercase answers are accepted. Saved answers become the defaults on updates.
+The database option is independent of the application Dockerfile option.
 
 ### Example
 
@@ -72,42 +78,49 @@ $ copier copy gh:privatedumbo/python-template my-project
 ═══════════════════════════════════════════════════════
 
 This template creates a modern Python project with:
-• UV for fast dependency management
+• uv for fast dependency management
 • Ruff for linting and formatting
-• Mypy for type checking
-• Pytest for testing
-• Pre-commit hooks
+• mypy for type checking
+• pytest for testing
+• prek for commit hooks
 
 Let's configure your new project!
 
-🎤 Project name (lowercase, underscores allowed).
-   my_awesome_project
-🎤 A short description of your project (one line).
-   A truly awesome Python project
-🎤 Your full name.
+🎤 Project name
+   my_project
+🎤 Project description
+   A library for processing data
+🎤 Author name
    John Doe
-🎤 Your email address.
+🎤 Author email
    john@example.com
-🎤 GitHub username or organization name.
+🎤 GitHub username or organization
    johndoe
-🎤 Minimum Python version for your project.
-   3.14 (stable, recommended)
-🎤 Open source license for your project.
+🎤 Python version
+   3.14 (recommended)
+🎤 Project license
    MIT (permissive, simple)
 🎤 Include Docker support?
    Yes
-🎤 Include GitHub Actions CI/CD?
+🎤 Include GitHub Actions workflows?
    Yes
+🎤 Include PostgreSQL and Alembic migrations?
+   No
     create  .copier-answers.yml
     create  AGENTS.md
     create  .gitignore
     create  .pre-commit-config.yaml
     create  .python-version
+    create  uv.toml
+    create  renovate.json
+    create  .dockerignore
     create  Dockerfile
     create  LICENSE
     create  README.md
-    create  my_awesome_project/__init__.py
-    create  my_awesome_project/main.py
+    create  src/my_project/__init__.py
+    create  src/my_project/__main__.py
+    create  src/my_project/main.py
+    create  src/my_project/py.typed
     create  pyproject.toml
     create  scripts/app.toml
     create  tests/__init__.py
@@ -141,17 +154,17 @@ git clone https://github.com/privatedumbo/python-template.git
 cd python-template
 
 # Install dependencies
-uv sync --all-extras
+uv sync --locked
 ```
 
 ### Running Tests
 
 ```bash
 # Run all tests
-uv run poe test
+uv run --locked poe test
 
-# Run full validation (format, lint, check, test)
-uv run poe flct
+# Validate without changing source or dependency versions
+uv run --locked poe validate
 ```
 
 ### Manual Testing
@@ -159,10 +172,39 @@ uv run poe flct
 Generate a project to a temporary directory:
 
 ```bash
-uv run poe generate
+uv run --locked poe generate
 ```
 
-This creates a test project at `/tmp/test-project`.
+This creates a test project at `/tmp/test-project`. Use a fresh destination.
+
+The uv version is pinned in `uv.toml`; install it before running repository tasks.
+Generated projects keep Python 3.14 as the default and offer 3.13 and 3.15.
+Tests validate generated projects on all three interpreters.
+
+```bash
+uv run --locked poe validate  # Non-mutating checks and template tests
+RUN_DOCKER_TESTS=1 uv run --locked pytest -m docker -v
+```
+
+Docker tests build and run generated images, including Python 3.15 and the
+no-license option. They also exercise PostgreSQL 18 migrations, data persistence
+across down/up, and destruction of the isolated test database. They require a
+running Docker daemon with Docker Compose.
+
+Projects generated with PostgreSQL support include `compose.db.yaml`,
+`.env.example`, Alembic configuration, and a SQLAlchemy base in the package's
+`db.py`. After copying `.env.example` to `.env`, use `poe db:up` to start the
+database, `poe db:setup` to apply migrations, `poe db:down` to preserve data while
+removing the container, and `poe db:destroy` to remove the container and its data.
+
+Enable the Renovate GitHub App to activate `renovate.json`. The repository config
+includes custom extraction for pinned tools inside Jinja templates, while each
+generated project receives its own updater configuration. Version pins shared
+by uv configuration, dev dependencies, and Docker must be updated together.
+
+Existing generated projects need to merge application modules into `src/` when
+updating. See the generated README migration instructions before adopting this
+layout change.
 
 ---
 
@@ -172,9 +214,11 @@ This creates a test project at `/tmp/test-project`.
 python-template/
 ├── copier.yaml              # Copier configuration & questions
 ├── template/                # Template source files
-│   ├── {{project_slug}}/    # Package directory (templated name)
+│   ├── src/{{project_slug}}/ # Installed package (templated name)
 │   │   ├── __init__.py
-│   │   └── main.py.jinja
+│   │   ├── __main__.py.jinja
+│   │   ├── main.py.jinja
+│   │   └── py.typed
 │   ├── tests/
 │   │   ├── __init__.py
 │   │   └── test_core.py.jinja

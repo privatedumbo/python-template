@@ -10,34 +10,32 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "copier>=9.14.1",
-    "mypy>=1.20.0",
-    "poethepoet>=0.42.1",
-    "pre-commit>=4.5.1",
-    "pytest>=9.0.2",
-    "pytest-cov>=7.1.0",
-    "ruff>=0.15.8",
+    "copier==9.19.1",
+    "mypy==2.4.0",
+    "poethepoet==0.49.0",
+    "prek==0.5.5",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.1",
+    "uv==0.13.1",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+strict = true
+addopts = "--import-mode=importlib"
+markers = ["docker: builds and runs generated images (requires Docker)"]
 
 [tool.ruff]
 target-version = "py312"
 output-format = "full"
 line-length = 88
-fix = true
 # Exclude template directory from linting (it contains Jinja templates)
 exclude = ["template"]
 
 [tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "ANN",      # Type hints related, let mypy handle these.
-    "COM812",   # "Trailing comma missing". If black is happy, we are happy.
-    "D",        # Docstrings related, way too strict to our taste
-    "ISC001",   # Implicit string concatenation
-]
+# Annotation requirements are enforced by strict mypy.
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "PT", "PTH", "S", "ARG"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = [
@@ -55,7 +53,6 @@ strict = true
 namespace_packages = true
 explicit_package_bases = true
 plugins = []
-ignore_missing_imports = true
 exclude = ["template"]
 
 [tool.poe]

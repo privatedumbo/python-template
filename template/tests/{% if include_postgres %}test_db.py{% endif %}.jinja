@@ -1,0 +1,30 @@
+import pytest
+
+from {{ project_slug }}.db import get_database_url
+
+
+def test_database_settings_preserve_special_characters(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.setenv("POSTGRES_USER", "app")
+    monkeypatch.setenv("POSTGRES_PASSWORD", "p@ss:/%word")
+    monkeypatch.setenv("POSTGRES_DB", "app_db")
+    monkeypatch.setenv("POSTGRES_HOST", "localhost")
+    monkeypatch.setenv("POSTGRES_PORT", "5544")
+
+    url = get_database_url()
+    assert url.drivername == "postgresql+psycopg"
+    assert url.password == "p@ss:/%word"  # noqa: S105 - tests URL escaping
+    assert url.port == 5544
+    assert url.database == "app_db"
+
+
+def test_database_url_overrides_individual_settings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://app@remote/production")
+
+    url = get_database_url()
+    assert url.host == "remote"
+    assert url.database == "production"
